@@ -20,10 +20,12 @@ import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.model.types.TypeKind;
+import org.ballerinalang.model.util.JSONUtils;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+import org.ballerinalang.net.jms.BrokerUtils;
 import org.ballerinalang.net.jms.Constants;
 import org.ballerinalang.net.jms.JMSUtils;
 import org.slf4j.Logger;
@@ -59,46 +61,49 @@ public class Send extends AbstractJMSAction {
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
 
+
         // Extract argument values
         BStruct bConnector = (BStruct) context.getRefArgument(0);
         BStruct messageStruct = ((BStruct) context.getRefArgument(1));
         String destination = context.getStringArgument(0);
 
-        // Retrieve the ack mode from jms client configuration
-        BStruct connectorConfig = ((BStruct) bConnector.getRefField(0));
-        String acknowledgementMode = connectorConfig.getStringField(Constants.CLIENT_CONFIG_ACK_FIELD_INDEX);
-
-        // Retrieve transport client
-        JMSClientConnector jmsClientConnector
-                = (JMSClientConnector) bConnector.getNativeData(Constants.JMS_TRANSPORT_CLIENT_CONNECTOR);
-
-        String connectorKey = bConnector.getStringField(0);
-
-        Message jmsMessage = JMSUtils.getJMSMessage(messageStruct);
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("sending JMS Message to " + destination);
-            }
-            // Add ReplyTo header to the message
-            JMSUtils.updateReplyToDestination(messageStruct, jmsClientConnector);
-
-            if (JMSConstants.SESSION_TRANSACTED_MODE.equalsIgnoreCase(acknowledgementMode)
-                    || JMSConstants.XA_TRANSACTED_MODE.equalsIgnoreCase(acknowledgementMode)) {
-                // if the action is not called inside a transaction block
-                if (!context.isInTransaction()) {
-                    String errorMessage = "jms transacted send action should perform inside a transaction block ";
-                    callableUnitCallback.notifyFailure(BLangVMErrors.createError(context, errorMessage));
-                }
-                SessionWrapper sessionWrapper = getTxSession(context, jmsClientConnector, connectorKey);
-                jmsClientConnector.sendTransactedMessage(jmsMessage, destination, sessionWrapper);
-            } else {
-                jmsClientConnector.send(jmsMessage, destination);
-            }
-        } catch (JMSConnectorException e) {
-            callableUnitCallback.notifyFailure(BLangVMErrors.createError(context,
-                                                                         "failed to send message. " + e.getMessage()));
-        }
+        BrokerUtils.publish(destination, JSONUtils.convertStructToJSON(messageStruct).stringValue().getBytes());
         callableUnitCallback.notifySuccess();
+//        // Retrieve the ack mode from jms client configuration
+//        BStruct connectorConfig = ((BStruct) bConnector.getRefField(0));
+//        String acknowledgementMode = connectorConfig.getStringField(Constants.CLIENT_CONFIG_ACK_FIELD_INDEX);
+//
+//        // Retrieve transport client
+//        JMSClientConnector jmsClientConnector
+//                = (JMSClientConnector) bConnector.getNativeData(Constants.JMS_TRANSPORT_CLIENT_CONNECTOR);
+//
+//        String connectorKey = bConnector.getStringField(0);
+//
+//        Message jmsMessage = JMSUtils.getJMSMessage(messageStruct);
+//
+//        try {
+//            if (log.isDebugEnabled()) {
+//                log.debug("sending JMS Message to " + destination);
+//            }
+//            // Add ReplyTo header to the message
+//            JMSUtils.updateReplyToDestination(messageStruct, jmsClientConnector);
+//
+//            if (JMSConstants.SESSION_TRANSACTED_MODE.equalsIgnoreCase(acknowledgementMode)
+//                    || JMSConstants.XA_TRANSACTED_MODE.equalsIgnoreCase(acknowledgementMode)) {
+//                // if the action is not called inside a transaction block
+//                if (!context.isInTransaction()) {
+//                    String errorMessage = "jms transacted send action should perform inside a transaction block ";
+//                    callableUnitCallback.notifyFailure(BLangVMErrors.createError(context, errorMessage));
+//                }
+//                SessionWrapper sessionWrapper = getTxSession(context, jmsClientConnector, connectorKey);
+//                jmsClientConnector.sendTransactedMessage(jmsMessage, destination, sessionWrapper);
+//            } else {
+//                jmsClientConnector.send(jmsMessage, destination);
+//            }
+//        } catch (JMSConnectorException e) {
+//            callableUnitCallback.notifyFailure(BLangVMErrors.createError(context,
+//                                                                         "failed to send message. " + e.getMessage()));
+//        }
+//        callableUnitCallback.notifySuccess();
     }
 }

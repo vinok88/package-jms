@@ -26,11 +26,14 @@ import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.net.jms.BrokerUtils;
 import org.ballerinalang.net.jms.Constants;
 import org.ballerinalang.net.jms.JMSUtils;
+import org.ballerinalang.net.jms.WorkflowSubscriber;
 import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.broker.core.Broker;
 import org.wso2.transport.jms.contract.JMSClientConnector;
 import org.wso2.transport.jms.exception.JMSConnectorException;
 import org.wso2.transport.jms.sender.wrappers.SessionWrapper;
@@ -69,7 +72,15 @@ public class Receive extends AbstractJMSAction {
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
         // pass selector as null, because this is invoked under non-selector poll
-        executePollAction(context, callableUnitCallback, null);
+//        executePollAction(context, callableUnitCallback, null);
+        startSubscriber(context, callableUnitCallback);
+    }
+
+    protected void startSubscriber(Context context, CallableUnitCallback callableUnitCallback){
+        // Extract argument values
+        String destination = context.getStringArgument(0);
+        log.info("Starting subscription on the destination - " + destination);
+        BrokerUtils.addSubscription(destination, new WorkflowSubscriber(destination, callableUnitCallback, context));
     }
 
     protected void executePollAction(Context context,
