@@ -21,7 +21,6 @@ import io.ballerina.messaging.broker.core.Consumer;
 import io.ballerina.messaging.broker.core.Message;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
-import org.ballerinalang.bre.bvm.WorkerExecutionContext;
 import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
 import org.ballerinalang.model.values.BStruct;
 
@@ -46,7 +45,7 @@ public class WorkflowSubscriber extends Consumer {
         bStruct.addNativeData(org.ballerinalang.net.jms.Constants.JMS_API_MESSAGE,
                 message);
         bStruct.addNativeData(Constants.INBOUND_REQUEST, Boolean.FALSE);
-        BrokerUtils.removeSubscription(this);
+        BalBrokerUtils.removeSubscription(this);
 
         context.setReturnValues(bStruct);
         callableUnitCallback.notifySuccess();

@@ -69,9 +69,12 @@
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.messaging</groupId>
+            <groupId>io.ballerina.messaging</groupId>
             <artifactId>broker-core</artifactId>
-            <version>4.0.47</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ballerina.messaging</groupId>
+            <artifactId>broker-auth</artifactId>
         </dependency>
     </dependencies>
     
@@ -279,6 +282,18 @@
                                     <groupId>org.wso2.securevault</groupId>
                                     <artifactId>org.wso2.securevault</artifactId>
                                     <version>${securevault.version}</version>
+                                    <type>${project.packaging}</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.ballerina.messaging</groupId>
+                                    <artifactId>broker-core</artifactId>
+                                    <version>${ballerina.broker.core.version}</version>
+                                    <type>${project.packaging}</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.ballerina.messaging</groupId>
+                                    <artifactId>broker-auth</artifactId>
+                                    <version>${ballerina.broker.core.version}</version>
                                     <type>${project.packaging}</type>
                                 </artifactItem>
                             </artifactItems>

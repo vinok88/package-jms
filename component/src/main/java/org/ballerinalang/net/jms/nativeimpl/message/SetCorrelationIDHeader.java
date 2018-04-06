@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.jms.nativeimpl.message;
 
+import io.ballerina.messaging.broker.core.Metadata;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.model.types.TypeKind;
@@ -55,13 +56,16 @@ public class SetCorrelationIDHeader extends AbstractBlockinAction {
         BStruct messageStruct  = ((BStruct) context.getRefArgument(0));
         String value = context.getStringArgument(0);
 
-        Message jmsMessage = JMSUtils.getJMSMessage(messageStruct);
+        JMSUtils.getBrokerMessage(messageStruct)
+                .getMetadata().addHeader(Metadata.CORRELATION_ID.toString(), value);
 
-        try {
-            jmsMessage.setJMSCorrelationID(value);
-        } catch (JMSException e) {
-            log.error("Unable to set CorrelationID header to the JMS Message. " + e.getLocalizedMessage());
-        }
+//        try {
+//            jmsMessage.setJMSCorrelationID(value);
+//            brokerMessage.getMetadata().addHeader(Metadata.CORRELATION_ID.toString(), value);
+
+//        } catch (JMSException e) {
+//            log.error("Unable to set CorrelationID header to the JMS Message. " + e.getLocalizedMessage());
+//        }
 
         if (log.isDebugEnabled()) {
             log.debug("Add CorrelationID to JMS message");

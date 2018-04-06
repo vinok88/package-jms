@@ -141,6 +141,16 @@
                 <version>${ballerina.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.ballerina.messaging</groupId>
+                <artifactId>broker-core</artifactId>
+                <version>${ballerina.broker.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ballerina.messaging</groupId>
+                <artifactId>broker-auth</artifactId>
+                <version>${ballerina.broker.core.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.jms</groupId>
                 <artifactId>javax.jms-api</artifactId>
                 <version>${javax.jms.version}</version>
@@ -260,6 +270,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
         <ballerina.version>0.970.0-alpha0</ballerina.version>
         <wso2.transport.jms.version>6.0.50</wso2.transport.jms.version>
+        <ballerina.broker.core.version>0.1.47</ballerina.broker.core.version>
         <javax.jms.version>2.0.1</javax.jms.version>
         <org.testng.version>6.11</org.testng.version>
         <apache.commons-pool2.version>2.4.2</apache.commons-pool2.version>

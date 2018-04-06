@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @BallerinaFunction(
         orgName = "ballerina", packageName = "net.jms",
         functionName = "getClient",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "ClientEndpoint",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "QueueEndpoint",
                              structPackage = "ballerina.net.jms"),
         returnType = {@ReturnType(type = TypeKind.STRING)},
         isPublic = true

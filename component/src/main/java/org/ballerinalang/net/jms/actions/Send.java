@@ -16,26 +16,21 @@
 
 package org.ballerinalang.net.jms.actions;
 
+import io.ballerina.messaging.broker.core.BrokerException;
+import io.ballerina.messaging.broker.core.Message;
 import org.ballerinalang.bre.Context;
-import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
+import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.util.JSONUtils;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.net.jms.BrokerUtils;
+import org.ballerinalang.net.jms.BalBrokerUtils;
 import org.ballerinalang.net.jms.Constants;
-import org.ballerinalang.net.jms.JMSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.transport.jms.contract.JMSClientConnector;
-import org.wso2.transport.jms.exception.JMSConnectorException;
-import org.wso2.transport.jms.sender.wrappers.SessionWrapper;
-import org.wso2.transport.jms.utils.JMSConstants;
-
-import javax.jms.Message;
 
 /**
  * {@code Send} is the send action implementation of the JMS Connector.
@@ -49,8 +44,6 @@ import javax.jms.Message;
                    args = {
                            @Argument(name = "client",
                                      type = TypeKind.STRUCT),
-                           @Argument(name = "destinationName",
-                                     type = TypeKind.STRING),
                            @Argument(name = "message",
                                      type = TypeKind.STRUCT)
                    }
@@ -65,9 +58,16 @@ public class Send extends AbstractJMSAction {
         // Extract argument values
         BStruct bConnector = (BStruct) context.getRefArgument(0);
         BStruct messageStruct = ((BStruct) context.getRefArgument(1));
-        String destination = context.getStringArgument(0);
+//        String destination = context.getStringArgument(0);
+//        String destination = BLangConnectorSPIUtil.getConnectorEndpointStruct(context).getStructField("config")
+//                .getStringField("destination");
 
-        BrokerUtils.publish(destination, JSONUtils.convertStructToJSON(messageStruct).stringValue().getBytes());
+//        BalBrokerUtils.publish(destination, JSONUtils.convertStructToJSON(messageStruct).stringValue().getBytes());
+        try {
+            BalBrokerUtils.publish((Message) messageStruct.getNativeData(Constants.JMS_API_MESSAGE));
+        } catch (BrokerException e) {
+            log.error("Message sending failed", e);
+        }
         callableUnitCallback.notifySuccess();
 //        // Retrieve the ack mode from jms client configuration
 //        BStruct connectorConfig = ((BStruct) bConnector.getRefField(0));

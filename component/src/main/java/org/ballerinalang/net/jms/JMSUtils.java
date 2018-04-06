@@ -128,34 +128,34 @@ public class JMSUtils {
     public static Map<String, String> preProcessEndpointConfig(Struct endpointConfig) {
         Map<String, String> configParams = new HashMap<>();
 
-        String initialContextFactory = endpointConfig.getStringField("initialContextFactory");
-        String providerUrl = endpointConfig.getStringField("providerUrl");
-        String connectionFactoryName = endpointConfig.getStringField("connectionFactoryName");
+//        String initialContextFactory = endpointConfig.getStringField("initialContextFactory");
+//        String providerUrl = endpointConfig.getStringField("providerUrl");
+//        String connectionFactoryName = endpointConfig.getStringField("connectionFactoryName");
         String destinationType = endpointConfig.getStringField("destinationType");
         boolean clientCaching = endpointConfig.getBooleanField("clientCaching");
-        String connectionUsername = endpointConfig.getStringField("connectionUsername");
-        String connectionPassword = endpointConfig.getStringField("connectionPassword");
-        String configFilePath = endpointConfig.getStringField("configFilePath");
-        int connectionCount = (int) endpointConfig.getIntField("connectionCount");
-        int sessionCount = (int) endpointConfig.getIntField("sessionCount");
+//        String connectionUsername = endpointConfig.getStringField("connectionUsername");
+//        String connectionPassword = endpointConfig.getStringField("connectionPassword");
+//        String configFilePath = endpointConfig.getStringField("configFilePath");
+//        int connectionCount = (int) endpointConfig.getIntField("connectionCount");
+//        int sessionCount = (int) endpointConfig.getIntField("sessionCount");
 
         // Add to the map
-        configParams.put(Constants.ALIAS_INITIAL_CONTEXT_FACTORY, initialContextFactory);
-        configParams.put(Constants.ALIAS_CONNECTION_FACTORY_NAME, connectionFactoryName);
+//        configParams.put(Constants.ALIAS_INITIAL_CONTEXT_FACTORY, initialContextFactory);
+//        configParams.put(Constants.ALIAS_CONNECTION_FACTORY_NAME, connectionFactoryName);
         configParams.put(Constants.ALIAS_DESTINATION_TYPE, destinationType);
         configParams.put(JMSConstants.PARAM_JMS_CACHING, String.valueOf(clientCaching));
-        if (isBlank(providerUrl)) {
-            configParams.put(Constants.ALIAS_PROVIDER_URL, providerUrl);
-        }
-        if (isBlank(configFilePath)) {
-            configParams.put(Constants.CONFIG_FILE_PATH, configFilePath);
-        }
-        if (isBlank(connectionUsername)) {
-            configParams.put(JMSConstants.CONNECTION_USERNAME, connectionUsername);
-            configParams.put(JMSConstants.CONNECTION_PASSWORD, connectionPassword);
-        }
-        configParams.put(JMSConstants.PARAM_MAX_CONNECTIONS, String.valueOf(connectionCount));
-        configParams.put(JMSConstants.PARAM_MAX_SESSIONS_ON_CONNECTION, String.valueOf(sessionCount));
+//        if (isBlank(providerUrl)) {
+//            configParams.put(Constants.ALIAS_PROVIDER_URL, providerUrl);
+//        }
+//        if (isBlank(configFilePath)) {
+//            configParams.put(Constants.CONFIG_FILE_PATH, configFilePath);
+//        }
+//        if (isBlank(connectionUsername)) {
+//            configParams.put(JMSConstants.CONNECTION_USERNAME, connectionUsername);
+//            configParams.put(JMSConstants.CONNECTION_PASSWORD, connectionPassword);
+//        }
+//        configParams.put(JMSConstants.PARAM_MAX_CONNECTIONS, String.valueOf(connectionCount));
+//        configParams.put(JMSConstants.PARAM_MAX_SESSIONS_ON_CONNECTION, String.valueOf(sessionCount));
 
         preProcessMapField(configParams, endpointConfig.getMapField("properties"));
 
@@ -195,6 +195,23 @@ public class JMSUtils {
             BallerinaJMSMessage ballerinaJMSMessage = (BallerinaJMSMessage) messageStruct
                     .getNativeData(Constants.JMS_API_MESSAGE);
             return ballerinaJMSMessage.getJmsMessage();
+        } else {
+            throw new BallerinaException("JMS message has not been created.");
+        }
+    }
+
+    /**
+     * Extract Broker Message from the struct.
+     *
+     * @param messageStruct ballerina struct.
+     * @return {@link Message} instance located in struct.
+     */
+    public static io.ballerina.messaging.broker.core.Message getBrokerMessage(BStruct messageStruct) {
+        if (messageStruct.getNativeData(Constants.JMS_API_MESSAGE) != null) {
+            io.ballerina.messaging.broker.core.Message brokerMessage = (io.ballerina.messaging.broker.core.Message)
+                    messageStruct
+                    .getNativeData(Constants.JMS_API_MESSAGE);
+            return brokerMessage;
         } else {
             throw new BallerinaException("JMS message has not been created.");
         }

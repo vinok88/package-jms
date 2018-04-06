@@ -29,18 +29,12 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.jms.AbstractBlockinAction;
-import org.ballerinalang.net.jms.BallerinaJMSMessage;
+import org.ballerinalang.net.jms.BalBrokerUtils;
 import org.ballerinalang.net.jms.Constants;
-import org.ballerinalang.util.exceptions.BallerinaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.transport.jms.contract.JMSClientConnector;
-import org.wso2.transport.jms.exception.JMSConnectorException;
-import org.wso2.transport.jms.utils.JMSConstants;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
+import io.ballerina.messaging.broker.core.Message;
 
 /**
  * Create Text JMS Message.
@@ -48,11 +42,11 @@ import javax.jms.TextMessage;
 @BallerinaFunction(orgName = "ballerina", packageName = "net.jms",
                    functionName = "createTextMessage",
                    receiver = @Receiver(type = TypeKind.STRUCT,
-                                        structType = "ClientEndpoint",
+                                        structType = "QueueEndpoint",
                                         structPackage = "ballerina.net.jms"),
                    args = {
                            @Argument(name = "content",
-                                     type = TypeKind.STRING)
+                                     type = TypeKind.STRING),
                    },
                    returnType = {
                            @ReturnType(type = TypeKind.STRUCT,
@@ -68,25 +62,26 @@ public class CreateTextMessage extends AbstractBlockinAction {
 
         log.info("create text message got called");
         Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
+        String destination = clientEndpoint.getStructField("config").getStringField("destination");
         String content = context.getStringArgument(0);
 
 
-        JMSClientConnector jmsClientConnector
-                = (JMSClientConnector) clientEndpoint.getNativeData(Constants.JMS_TRANSPORT_CLIENT_CONNECTOR);
+//        JMSClientConnector jmsClientConnector
+//                = (JMSClientConnector) clientEndpoint.getNativeData(Constants.JMS_TRANSPORT_CLIENT_CONNECTOR);
 
-        Message jmsMessage;
+        Message jmsMessage = BalBrokerUtils.createMessage(destination, content.getBytes());
 
-        try {
-            jmsMessage = jmsClientConnector.createMessage(JMSConstants.TEXT_MESSAGE_TYPE);
-            ((TextMessage) jmsMessage).setText(content);
-        } catch (JMSConnectorException | JMSException e) {
-            throw new BallerinaException("Failed to create message. " + e.getMessage(), e, context);
-        }
+//        try {
+//            jmsMessage = jmsClientConnector.createMessage(JMSConstants.TEXT_MESSAGE_TYPE);
+//            ((TextMessage) jmsMessage).setText(content);
+//        } catch (JMSConnectorException | JMSException e) {
+//            throw new BallerinaException("Failed to create message. " + e.getMessage(), e, context);
+//        }
 
         BStruct bStruct = BLangConnectorSPIUtil
                 .createBStruct(context, Constants.PROTOCOL_PACKAGE_JMS, Constants.JMS_MESSAGE_STRUCT_NAME);
 
-        bStruct.addNativeData(org.ballerinalang.net.jms.Constants.JMS_API_MESSAGE, new BallerinaJMSMessage(jmsMessage));
+        bStruct.addNativeData(org.ballerinalang.net.jms.Constants.JMS_API_MESSAGE, jmsMessage);
         bStruct.addNativeData(Constants.INBOUND_REQUEST, Boolean.FALSE);
 
         context.setReturnValues(bStruct);
